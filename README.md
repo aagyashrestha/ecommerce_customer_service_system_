@@ -15,7 +15,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/yourusername/ecommerce-support-system.git
+git clone https://github.com/yourusername/ecommerce_customer_service_system.git
 
 
 cd ecommerce-support-system
@@ -37,6 +37,5 @@ streamlit run app.py
 <img width="589" alt="Screenshot 2024-08-26 at 2 46 31 PM" src="https://github.com/user-attachments/assets/4128df96-5655-4a67-9f60-6c3e99a6779f">
 
 
-
-
+<img width="629" alt="Screenshot 2024-08-26 at 2 54 27 PM" src="https://github.com/user-attachments/assets/b171f0e4-4e46-4ebf-b18e-667ab84cac80">
 
