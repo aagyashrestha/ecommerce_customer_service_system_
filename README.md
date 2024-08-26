@@ -15,7 +15,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/yourusername/ecommerce_customer_service_system.git
+git clone https://github.com/aagyashrestha/ecommerce_customer_service_system_.git
 
 
 cd ecommerce-support-system
