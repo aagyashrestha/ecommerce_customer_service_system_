@@ -32,7 +32,6 @@ conversation_history = {}
 # Function for rule-based intent classification
 def rule_based_intent(text):
     text = text.lower()
-
     if any(word in text for word in ["order", "status", "track"]):
         return "Order Status"
     elif any(word in text for word in ["cart", "manage", "items"]):
@@ -50,11 +49,8 @@ def rule_based_intent(text):
 
 # Function to classify intent using a hybrid approach
 def classify_intent(text):
-    # Try rule-based classification first
     intent = rule_based_intent(text)
-
     if intent is None:
-        # Fallback to model-based classification
         inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
         with torch.no_grad():
             outputs = model(**inputs)
@@ -62,8 +58,17 @@ def classify_intent(text):
         predicted_class = torch.argmax(logits, dim=1).item()
         intent = intents.get(predicted_class, "Unknown Intent")
 
-    print(f"Classified intent: {intent} for text: '{text}'")
+    print(f"Classified intent: {intent} for text: '{text}'")  # Debugging line
     return intent
+
+# Function to simulate backend integration for fetching real-time data (placeholder)
+def fetch_from_backend(intent, user_input=None):
+    # Simulated backend responses
+    backend_responses = {
+        "Order Status": "Your order is currently being processed and will be shipped soon.",
+        "Product Inquiry": "We have several products in that category. Would you like to see our bestsellers?",
+    }
+    return backend_responses.get(intent, None)
 
 # Function to generate response based on intent and conversation context
 def generate_response(intent, user_id, context=None):
@@ -98,17 +103,35 @@ def generate_response(intent, user_id, context=None):
         ]
     }
 
+    # Fetch real-time data from backend if available
+    backend_response = fetch_from_backend(intent)
+    if backend_response:
+        return backend_response
+
     # Choose a random response for variety
     response = random.choice(responses.get(intent, ["Sorry, I didn't understand that. Can you please clarify?"]))
-    print(f"Generated response: {response} for intent: '{intent}'")
+
+    # Check if we need to follow up on any context
+    if context and 'pending' in context and context['pending']:
+        if intent == "Order Status" and 'order_id' not in context:
+            response = "Could you please provide the order ID so I can check the status for you?"
+            context['pending'] = True
+        elif intent == "Return Request" and 'order_id' not in context:
+            response = "I will need your order number to process the return request."
+            context['pending'] = True
+        else:
+            context['pending'] = False
+
+    print(f"Generated response: {response} for intent: '{intent}'")  # Debugging line
     return response
 
 # Function to handle text input
 def handle_text_input(text, user_id):
     try:
+        context = conversation_history.get(user_id, {'pending': False})
         intent = classify_intent(text)
-        response = generate_response(intent, user_id, context=conversation_history.get(user_id))
-        conversation_history[user_id] = (text, response)
+        response = generate_response(intent, user_id, context=context)
+        conversation_history[user_id] = context
         return response
     except Exception as e:
         return f"Error processing text input: {e}"
@@ -121,10 +144,11 @@ def handle_audio_input(audio_bytes, user_id):
         with sr.AudioFile(audio_file) as source:
             audio_data = recognizer.record(source)
         text = recognizer.recognize_google(audio_data)
-        print(f"Recognized text from audio: '{text}'")
+        print(f"Recognized text from audio: '{text}'")  # Debugging line
+        context = conversation_history.get(user_id, {'pending': False})
         intent = classify_intent(text)
-        response_text = generate_response(intent, user_id, context=conversation_history.get(user_id))
-        conversation_history[user_id] = (text, response_text)
+        response_text = generate_response(intent, user_id, context=context)
+        conversation_history[user_id] = context
 
         # Generate audio response
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
@@ -134,7 +158,7 @@ def handle_audio_input(audio_bytes, user_id):
 
         # Provide a link to download or play the audio response
         st.audio(audio_file_path, format='audio/mp3')
-        os.remove(audio_file_path)
+        os.remove(audio_file_path)  # Clean up the temporary file
     except sr.UnknownValueError:
         st.error("Sorry, I could not understand the audio.")
     except sr.RequestError:
@@ -154,6 +178,19 @@ def main():
 
     mode = st.selectbox("Choose Input Mode", ["Text", "Audio"])
 
+    # Text input area
+    st.subheader("Enter Your Query:")
+    text_input = st.text_area("Enter your query:")
+    if st.button("Submit"):
+        if text_input:
+            response = handle_text_input(text_input, user_id)
+            st.write("Response:", response)
+            # Check if escalation is needed
+            if response == "Sorry, I didn't understand that. Can you please clarify?":
+                escalate_to_human()
+        else:
+            st.error("Please enter your query.")
+
     if mode == "Text":
         # Section for pre-built queries
         st.subheader("Pre-built Queries")
@@ -171,19 +208,6 @@ def main():
             if st.button(label):
                 response = handle_text_input(query, user_id)
                 st.write("Response:", response)
-
-        # Text input area
-        st.subheader("Or Enter Your Own Query:")
-        text_input = st.text_area("Enter your query:")
-        if st.button("Submit"):
-            if text_input:
-                response = handle_text_input(text_input, user_id)
-                st.write("Response:", response)
-                # Check if escalation is needed
-                if response == "Sorry, I didn't understand that. Can you please clarify?":
-                    escalate_to_human()
-            else:
-                st.error("Please enter your query.")
 
     elif mode == "Audio":
         st.subheader("Upload your audio file:")
