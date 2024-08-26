@@ -181,7 +181,7 @@ def main():
     # Text input area
     st.subheader("Enter Your Query:")
     text_input = st.text_area("Enter your query:")
-    if st.button("Submit"):
+    if st.button("Submit", key="submit_text"):
         if text_input:
             response = handle_text_input(text_input, user_id)
             st.write("Response:", response)
@@ -205,14 +205,14 @@ def main():
         }
 
         for label, query in query_buttons.items():
-            if st.button(label):
+            if st.button(label, key=f"query_button_{label}"):
                 response = handle_text_input(query, user_id)
                 st.write("Response:", response)
 
     elif mode == "Audio":
         st.subheader("Upload your audio file:")
         audio_file = st.file_uploader("Upload an audio file", type=["wav"])
-        if st.button("Submit"):
+        if st.button("Submit", key="submit_audio"):
             if audio_file is not None:
                 handle_audio_input(audio_file.read(), user_id)
             else:
