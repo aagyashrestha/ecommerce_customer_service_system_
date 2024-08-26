@@ -1,3 +1,4 @@
+link - https://ecommercecustomerservicesystem.streamlit.app
 
 E-commerce Customer Support System
 
@@ -6,11 +7,18 @@ This project is an interactive customer support system for an e-commerce platfor
 Features
 
 Multimodal Input Handling: Supports both text and audio inputs.
+
 Hybrid Intent Classification: Uses a combination of rule-based logic and a pre-trained BERT model to classify user intents into predefined categories.
+
 Dynamic Response Generation: Provides context-aware responses based on user queries and maintains conversation state.
+
 Audio Response: Converts text responses into speech using gTTS and allows users to download or play the response.
+
 Backend Simulation: Integrates simulated backend responses for real-time data fetching.
+
 Escalation to Human Agent: Transfers complex queries to a human agent when needed.
+
+
 Installation
 
 Clone the repository:
