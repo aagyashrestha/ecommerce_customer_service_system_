@@ -1,6 +1,6 @@
 streamlit
-openai
 transformers
 torch
-librosa
-soundfile
+gtts
+speechrecognition
+pydub
